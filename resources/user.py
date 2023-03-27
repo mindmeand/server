@@ -156,3 +156,42 @@ class UserInfoResource(Resource) :
             return {"error" : "잘못된 유저 아이디 입니다"}, 400
 
         return {"result" : "success", "user" : result_list[0]}, 200
+
+# 유저 정보 수정
+    @jwt_required()
+    def put(self) :
+        # {"name": "김이름",
+        # "birthday": "19980101",
+        # "email": "abc@naver.com"}
+        
+        data = request.get_json()
+        user_id = get_jwt_identity()
+
+        try :
+            connection = get_connection()
+
+            query = ''' update user
+                    set
+                    name = %s,
+                    birthday = %s,
+                    email = %s
+                    where id = %s; '''
+
+            record = (data['name'], data['birthday'], data['email'], user_id)
+
+            cursor = connection.cursor()
+
+            cursor.execute(query, record)
+
+            connection.commit()
+
+            cursor.close()
+            connection.close()
+
+        except Error as e :
+            print(e)
+            cursor.close()
+            connection.close()
+            return {"result" : "fail", "error" : str(e)}, 500
+
+        return {"result" : "success"}, 200
