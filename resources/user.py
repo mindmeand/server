@@ -11,7 +11,7 @@ from utils import check_password, hash_password
 class UserRegisterResource(Resource) :
     def post(self) :
         # { "name": "김이름",
-        # "birthday": "19980101",
+        # "birthDate": "19980101",
         # "email": "abc@naver.com",
         # "password": "12345" }
 
@@ -86,7 +86,8 @@ class UserLoginResource(Resource) :
 
             i = 0
             for row in result_list :
-                result_list[i]['created_at'] = row['created_at'].isoformat()
+                result_list[i]['createdAt'] = row['createdAt'].isoformat()
+                result_list[i]['updatedAt'] = row['updatedAt'].isoformat()
                 i = i + 1
 
             cursor.close()
@@ -106,7 +107,7 @@ class UserLoginResource(Resource) :
 
         access_token = create_access_token( result_list[0]['id'] )
 
-        return {"result" : "success", "access_token" : access_token, "msg" : "hello"}, 200
+        return {"result" : "success", "access_token" : access_token}, 200
 
 jwt_blacklist = set()
 # 로그아웃
@@ -130,7 +131,7 @@ class UserInfoResource(Resource) :
         try :
             connection = get_connection()
 
-            query = '''select name, birthday, email
+            query = '''select name, birthDate, email
                     from user
                     where id = %s ;'''
 
@@ -161,7 +162,7 @@ class UserInfoResource(Resource) :
     @jwt_required()
     def put(self) :
         # {"name": "김이름",
-        # "birthday": "19980101",
+        # "birthDate": "19980101",
         # "email": "abc@naver.com"}
         
         data = request.get_json()
@@ -173,11 +174,11 @@ class UserInfoResource(Resource) :
             query = ''' update user
                     set
                     name = %s,
-                    birthday = %s,
+                    birthDate = %s,
                     email = %s
                     where id = %s; '''
 
-            record = (data['name'], data['birthday'], data['email'], user_id)
+            record = (data['name'], data['birthDate'], data['email'], user_id)
 
             cursor = connection.cursor()
 
