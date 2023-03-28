@@ -57,3 +57,61 @@ class ConsultationResource(Resource) :
         
         return {'result':'success'},200
 
+
+# 질문 히스토리 가져오기
+
+class ConsultationHistoryResource(Resource):
+
+    @jwt_required()
+
+    def get(self) :
+
+        userId = get_jwt_identity()
+
+        try :
+            connection = get_connection()
+
+            query = '''select * from consultation
+                    where userId=%s
+                    order by createdAt desc;'''
+            
+
+            cursor = connection.cursor(dictionary=True)
+            
+            record = (userId,)
+
+            cursor.execute(query,record)
+            
+            resultList = cursor.fetchall()
+
+            print(resultList)
+
+            i = 0
+            for row in resultList :
+                resultList[i]['createdAt']=row['createdAt'].isoformat()
+                i = i+1
+
+            cursor.close()
+            connection.close()
+
+        except Error as e:
+            print(e)
+            cursor.close()
+            connection.close()
+
+            return{"result" : "fail", "error" : str(e)}, 500
+        
+        return {"result" : "success", "result" : resultList,"count":len(resultList)} ,200
+    
+
+
+
+
+
+
+
+            
+
+
+
+
