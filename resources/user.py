@@ -32,11 +32,11 @@ class UserRegisterResource(Resource) :
         try :
             connection = get_connection()
             query = '''insert into user
-                    (name, birthday, email, password)
+                    (name, birthDate, email, password)
                     values
                     (%s, %s, %s, %s);'''
             
-            record = (data["name"], data["birthday"], data["email"], hashed_password)
+            record = (data["name"], data["birthDate"], data["email"], hashed_password)
 
             cursor = connection.cursor()
 
