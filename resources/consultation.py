@@ -20,13 +20,23 @@ class ConsultationResource(Resource) :
         userId = get_jwt_identity()
         data = request.get_json()
         content = data["question"]
+        type = data["type"]
         
         openai.api_key = Config.openAIKey
+        # 유능하고 친절한 고민상담가
+        if type == 0:
+            system_message = "You are a competent and kind trouble counselor who listens to people's concerns and provides helpful advice."
+        # 객관적이고 냉철한 고민상담가
+        elif type == 1:
+            system_message = "You are an objective and cool-headed trouble counselor who listens to people's concerns and provides rational advice."
+        # 편안한 친구같은 고민상담가
+        else:  # counselor_type == 2
+            system_message = "You are a comforting friend-like trouble counselor who listens to people's concerns and provides warm and supportive advice."
 
         completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-                {"role": "system", "content": "You are a caring and empathetic trouble counselor who listens to people's concerns and provides warm and supportive advice."},
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_message},
                 {"role": "user", "content": content}
             ]
         )
@@ -39,10 +49,10 @@ class ConsultationResource(Resource) :
         try : 
             connection = get_connection()
             query = '''insert into consultation
-                    (userId,question,response)
+                    (userId,question,answer,type)
                     values
-                    (%s,%s,%s)'''
-            record = (userId,content,response_message)
+                    (%s,%s,%s,%s)'''
+            record = (userId,content,response_message,type)
             cursor = connection.cursor()
             cursor.execute(query,record)
             connection.commit()
